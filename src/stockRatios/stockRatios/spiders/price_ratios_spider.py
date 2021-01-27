@@ -1,6 +1,8 @@
 import scrapy
 import pymongo
 import configparser
+import time
+import random
 
 config = configparser.ConfigParser()
 config.read('../../config/config.ini')
@@ -19,6 +21,7 @@ class PriceRatiosSpider(scrapy.Spider):
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'pe-ratio'), callback=self.parse_pe, meta={'stock': stock['ticker']})
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'price-book'), callback=self.parse_pb, meta={'stock': stock['ticker']})
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'roe'), callback=self.parse_roe, meta={'stock': stock['ticker']})
+            time.sleep(15 + random.randint(-5, 5))
 
     def update_db(self, response, type, stock):
         table = response.xpath('//table[@class="table"]')[0]
