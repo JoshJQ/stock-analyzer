@@ -19,11 +19,11 @@ class PriceRatiosSpider(scrapy.Spider):
 
     def start_requests(self):
         baseUrl = "https://www.macrotrends.net/stocks/charts/{}/{}/{}"
-        for stock in stocks.find().batch_size(50):
+        for stock in stocks.find().batch_size(20):
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'pe-ratio'), callback=self.parse_pe, meta={'stock': stock['ticker']})
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'price-book'), callback=self.parse_pb, meta={'stock': stock['ticker']})
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'roe'), callback=self.parse_roe, meta={'stock': stock['ticker']})
-            time.sleep(15 + random.randint(-5, 5))
+            time.sleep(10 + random.randint(-5, 5))
 
     def update_db(self, response, type, stock):
         table = response.xpath('//table[@class="table"]')[0]
