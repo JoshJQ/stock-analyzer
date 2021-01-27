@@ -3,9 +3,11 @@ import pymongo
 import configparser
 import time
 import random
+from pathlib import Path
 
 config = configparser.ConfigParser()
-config.read('../../config/config.ini')
+configFile = "{0}/config/config.ini".format(str(Path.home()))
+config.read(configFile)
 mongo_url = config['DEFAULT']['MongoDBUrl']
 
 dbclient = pymongo.MongoClient(mongo_url)
@@ -16,9 +18,8 @@ class PriceRatiosSpider(scrapy.Spider):
     name = 'price-ratios'
 
     def start_requests(self):
-        baseUrl = 'https://www.macrotrends.net/stocks/charts/{}/{}/{}'
-        stock_list = stocks.find()
-        for stock in stock_list:
+        baseUrl = "https://www.macrotrends.net/stocks/charts/{}/{}/{}"
+        for stock in stocks.find().batch_size(50):
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'pe-ratio'), callback=self.parse_pe, meta={'stock': stock['ticker']})
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'price-book'), callback=self.parse_pb, meta={'stock': stock['ticker']})
             yield scrapy.Request(url=baseUrl.format(stock['ticker'], stock['stock_name'], 'roe'), callback=self.parse_roe, meta={'stock': stock['ticker']})
