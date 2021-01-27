@@ -11,9 +11,9 @@ def get_market_cap(stock):
     return float(stock["market_val"])
 
 
-logging.basicConfig(filename='stocks.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='stocks-list.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 config = configparser.ConfigParser()
-config.read('../config/config.ini')
+config.read('~/config/config.ini')
 stock_number = int(config['DEFAULT']['StockNumber'])
 mongo_url = config['DEFAULT']['MongoDBUrl']
 
