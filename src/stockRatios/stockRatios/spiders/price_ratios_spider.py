@@ -3,6 +3,7 @@ import pymongo
 import configparser
 import time
 import random
+import logging
 from pathlib import Path
 
 config = configparser.ConfigParser()
@@ -39,17 +40,21 @@ class PriceRatiosSpider(scrapy.Spider):
                     'date': date,
                     'value': rate.lstrip('$')
                 })
-
-        stocks.update_one(
-            {
-                'ticker': stock
-            },
-            {
-                '$set': {
-                    type: ratios
+        try:
+            stocks.update_one(
+                {
+                    'ticker': stock
+                },
+                {
+                    '$set': {
+                        type: ratios
+                    }
                 }
-            }
-        )
+            )
+        except:
+            logging.error("Failed to save stock {0}".format(stock["ticker"]))
+        else:
+            logging.debug("Saved stock {0}".format(stock["ticker"]))
 
     def parse_pe(self, response):
         self.update_db(response, 'pe', response.meta['stock'])

@@ -5,6 +5,7 @@ import json
 import time
 import logging
 import traceback
+from pathlib import Path
 
 
 def get_market_cap(stock):
@@ -13,7 +14,8 @@ def get_market_cap(stock):
 
 logging.basicConfig(filename='stocks-list.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 config = configparser.ConfigParser()
-config.read('~/config/config.ini')
+configFile = "{0}/config/config.ini".format(str(Path.home()))
+config.read(configFile)
 stock_number = int(config['DEFAULT']['StockNumber'])
 mongo_url = config['DEFAULT']['MongoDBUrl']
 
