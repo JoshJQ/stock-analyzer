@@ -39,7 +39,7 @@ try:
     # stock list
     for stock in stock_list:
         if stock["exchange"] in ['NYSE', 'NSDQ']:
-            if count < stock_number:
+            if count <= stock_number:
                 try:
                     if "." not in stock["ticker"]:
                         stocks.update_one(
