@@ -41,7 +41,7 @@ try:
         if stock["exchange"] in ['NYSE', 'NSDQ']:
             if count <= stock_number:
                 try:
-                    if "." not in stock["ticker"]:
+                    if float(stock["market_val"]) < 100000 and "." not in stock["ticker"]:
                         stocks.update_one(
                             {
                                 "ticker": stock["ticker"]
