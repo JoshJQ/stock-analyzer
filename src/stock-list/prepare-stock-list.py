@@ -41,23 +41,24 @@ try:
         if stock["exchange"] in ['NYSE', 'NSDQ']:
             if count < stock_number:
                 try:
-                    stocks.update_one(
-                        {
-                            "ticker": stock["ticker"]
-                        },
-                        {
-                            '$set': {
-                                "stock_name": stock["comp_name"],
-                                "industry": stock["zacks_x_ind_desc"],
-                                "sector": stock["zacks_x_sector_desc"],
-                                "company_name": stock["comp_name_2"],
-                                "exchange": stock["exchange"],
-                                "market_cap": stock["market_val"],
-                                "update_date": current_date
-                            }
-                        },
-                        upsert = True
-                    )
+                    if "." not in stock["ticker"]:
+                        stocks.update_one(
+                            {
+                                "ticker": stock["ticker"]
+                            },
+                            {
+                                '$set': {
+                                    "stock_name": stock["comp_name"],
+                                    "industry": stock["zacks_x_ind_desc"],
+                                    "sector": stock["zacks_x_sector_desc"],
+                                    "company_name": stock["comp_name_2"],
+                                    "exchange": stock["exchange"],
+                                    "market_cap": stock["market_val"],
+                                    "update_date": current_date
+                                }
+                            },
+                            upsert = True
+                        )
                     count = count + 1
                 except:
                     logging.error("Failed to save stock {0}".format(stock["ticker"]))
