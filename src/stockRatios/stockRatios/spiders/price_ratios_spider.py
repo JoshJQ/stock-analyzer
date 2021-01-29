@@ -52,9 +52,9 @@ class PriceRatiosSpider(scrapy.Spider):
                 }
             )
         except:
-            logging.error("Failed to save stock {0}".format(stock["ticker"]))
+            logging.error("Failed to save stock {0}".format(stock))
         else:
-            logging.debug("Saved stock {0}".format(stock["ticker"]))
+            logging.debug("Saved stock {0}".format(stock))
 
     def parse_pe(self, response):
         self.update_db(response, 'pe', response.meta['stock'])
