@@ -59,7 +59,7 @@ try:
                             },
                             upsert = True
                         )
-                    count = count + 1
+                        count = count + 1
                 except:
                     logging.error("Failed to save stock {0}".format(stock["ticker"]))
                 else:
