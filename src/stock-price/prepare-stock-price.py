@@ -25,63 +25,65 @@ try:
     stocks = stock_db["stocks"]
 
     base_url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={0}&apikey={1}"
-    for stock in stocks.find().batch_size(20):
-        if stock["ticker"].find('.') == -1:
-            logging.info("Processing prices for stock {0}".format(stock["ticker"]))
-            prices = []
-            if "prices" in stock:
-                prices = stock["prices"]
-            stock_url = base_url.format(stock["ticker"], apiKey)
-            latest_date = '1900-01-01'
-            if prices is not None and len(prices) > 0:
-                prices.sort(key=get_date, reverse=True)
-                latest_date = prices[0]["date"]
-                trade_date = datetime.datetime.strptime(latest_date, '%Y-%m-%d')
-                delta_date = datetime.datetime.now() - trade_date
-                # Miss over 100 days' trade, fetch full data
-                if delta_date.days > 100:
-                    stock_url = stock_url + '&outputsize=full'
-                elif delta_date.days < 5:
-                    logging.info("Stock {0} has been fetched within 5 days, ignore it".format(stock["ticker"]))
-                    continue
-            else:
+    delta_5days = datetime.timedelta(days=5)
+    price_date = datetime.datetime.now() - delta_5days
+    for stock in stocks.find({"$or": [{"price_date": None}, {"price_date": {"$lt":price_date}}]}).batch_size(20):
+        logging.info("Processing prices for stock {0}".format(stock["ticker"]))
+        prices = []
+        if "prices" in stock:
+            prices = stock["prices"]
+        stock_url = base_url.format(stock["ticker"], apiKey)
+        latest_date = '1900-01-01'
+        if prices is not None and len(prices) > 0:
+            prices.sort(key=get_date, reverse=True)
+            latest_date = prices[0]["date"]
+            trade_date = datetime.datetime.strptime(latest_date, '%Y-%m-%d')
+            delta_date = datetime.datetime.now() - trade_date
+            # Miss over 100 days' trade, fetch full data
+            if delta_date.days >= 30:
                 stock_url = stock_url + '&outputsize=full'
-                prices = []
+            elif delta_date.days < 5:
+                logging.info("Stock {0} has been fetched within 5 days, ignore it".format(stock["ticker"]))
+                continue
+        else:
+            stock_url = stock_url + '&outputsize=full'
+            prices = []
 
-            response = requests.get(stock_url)
-            if "Time Series (Daily)" in response.json():
-                prices_data = response.json()["Time Series (Daily)"]
-                for key in prices_data.keys():
-                    if key > latest_date:
-                        prices.append({
-                            "date": key,
-                            "open": prices_data[key]["1. open"],
-                            "high": prices_data[key]["2. high"],
-                            "low": prices_data[key]["3. low"],
-                            "close": prices_data[key]["4. close"],
-                            "volume": prices_data[key]["5. volume"]
-                        })
-                    else:
-                        break
-
-                prices.sort(key=get_date, reverse=True)
-                logging.info("prices size: {0}".format(len(prices)))
-                try:
-                    stocks.update_one(
-                        {
-                            'ticker': stock["ticker"]
-                        },
-                        {
-                            '$set': {
-                                "prices": prices
-                            }
-                        }
-                    )
-                except:
-                    logging.error("Failed to save stock {0}".format(stock["ticker"]))
+        response = requests.get(stock_url)
+        if "Time Series (Daily)" in response.json():
+            prices_data = response.json()["Time Series (Daily)"]
+            for key in prices_data.keys():
+                if key > latest_date:
+                    prices.append({
+                        "date": key,
+                        "open": prices_data[key]["1. open"],
+                        "high": prices_data[key]["2. high"],
+                        "low": prices_data[key]["3. low"],
+                        "close": prices_data[key]["4. close"],
+                        "volume": prices_data[key]["5. volume"]
+                    })
                 else:
-                    logging.debug("Saved stock {0}".format(stock["ticker"]))
-            time.sleep(13)
+                    break
+
+            prices.sort(key=get_date, reverse=True)
+            logging.info("prices size: {0}".format(len(prices)))
+            try:
+                stocks.update_one(
+                    {
+                        'ticker': stock["ticker"]
+                    },
+                    {
+                        '$set': {
+                            "prices": prices,
+                            "price_date": prices[0]["date"]
+                        }
+                    }
+                )
+            except:
+                logging.error("Failed to save stock {0}".format(stock["ticker"]))
+            else:
+                logging.debug("Saved stock {0}".format(stock["ticker"]))
+        time.sleep(13)
 except requests.exceptions.RequestException as err:
     logging.error("Error to crawl stock price from the website: {0}".format(err))
     raise SystemExit(err)
