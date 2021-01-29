@@ -40,7 +40,7 @@ try:
             trade_date = datetime.datetime.strptime(latest_date, '%Y-%m-%d')
             delta_date = datetime.datetime.now() - trade_date
             # Miss over 100 days' trade, fetch full data
-            if delta_date.days >= 30:
+            if delta_date.days > 100:
                 stock_url = stock_url + '&outputsize=full'
             elif delta_date.days < 5:
                 logging.info("Stock {0} has been fetched within 5 days, ignore it".format(stock["ticker"]))
