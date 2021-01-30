@@ -82,9 +82,9 @@ try:
 
     print('***********************************************************************************************************')
     with open("stocks_result.csv", "w") as outfile:
-        outfile.write('stock_name, ticker, company_name, industry, market_cap, pe_rank, pb_rank')
+        outfile.write('stock_name, ticker, company_name, industry, market_cap, pe_rank, pb_rank\n')
         for stock in results:
-            outfile.write('{}, {}, {}, {}, {}, {}, {}'.format(stock['stock_name'], stock['ticker'], stock['company_name'],
+            outfile.write('{}, {}, {}, {}, {}, {}, {}\n'.format(stock['stock_name'], stock['ticker'], stock['company_name'],
                                                     stock['industry'], stock['market_cap'], stock['pe_rank'], stock['pb_rank']))
 
 except pymongo.errors.ConnectionFailure as err:
