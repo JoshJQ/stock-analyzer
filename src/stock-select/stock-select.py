@@ -8,7 +8,7 @@ from pathlib import Path
 def get_date(stock):
     return stock["date"]
 
-logging.basicConfig(filename='stocks-price.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='stocks-select.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 config = configparser.ConfigParser()
 configFile = "{0}/config/config.ini".format(str(Path.home()))
 config.read(configFile)
